@@ -1,0 +1,87 @@
+Ejercicios Marcos Herrero
+
+--Ejercicio 1--
+
+Primero, creamos el archivo de datos bigFile, de 100 MiB de contenido aleatorio, con el mandato:
+
+ dd if=/dev/urandom of=bigFile bs=1024 count=100K
+
+A continuación, medimos el tiempo de copir el archivo para diferentes tamaños de bloque usando la orden:
+
+ time ./copy bigFile bigFile_copy (tamaño de bloque)
+ 
+Los resultados obtenidos son:
+ - Para bloques de 8 KiB : real 1,264s
+                           user 0,024s
+                           sys  0,193s
+                           
+ - Para bloques de 1 KiB : real 2,005s
+                           user 0,123s
+                           sys  0,475s
+ 
+ - Para bloques de 256 B : real 4,803s
+                           user 0,379s
+                           sys  1,643s
+                         
+ - Para bloques de 64 B : real 15,837s
+                          user  1,579s
+                          sys   6,261s
+ 
+                              
+El tiempo real es el tiempo cronológico transcurrido desde el inicio de la copia hasta el fin de la misma, el tiempo user es el tiempo de CPU dedicado
+al proceso de copia en modo usuario y el tiempo sys el tiempo de CPU empleado por el sistema operativo en resolver las llamadas al sistema generadas 
+por este proceso. Se observa que en todos los casos el tiempo mayor es el real , mucho mayor que los otros dos, por lo que se deduce que nuestro procesador está alternando entre el proceso de copia y muchos otros procesos (por ejemplo, al copiar 8 KiB, de los 1,264s que tarda en concluir la copia
+solo se le han dedicado 0,024+0,193= 0,217s a acciones relacionadas con la copia).
+Comparando entre las llamadas con distinto tamaño de bloque observamos que todos los tiempos aumentan conforme disminuye el tamaño de bloque. Esto es
+porque el número de llamadas al sistema read y write es el número de bloques a copiar, es decir, es mayor cuanto menor es el tamaño de bloque. Estas llamadas al sistema son lo más costoso del proceso de copia, ya que , cada vez que se hace una, hay que guardar el estado del procesador en el BCP
+para poder cederle el control al sitema operativo y pasar a modo kernel, donde realmente se realiza la lectura o escritura.
+
+--Ejercicio 2--
+
+El codigo de status.c se ha modificado en el subdirectorio 2_status según se pide 
+
+--Ejercicio 3--
+
+El resultado de aplicar el programa al directorio $HOME con la opción t es:
+
+Results for the directory /home/usuarioso.
+Range		Total	Percentage
+[0K, 10K]	1586	62.001564%
+[10K, 20K]	365	14.268960%
+[20K, 30K]	217	8.483190%
+[30K, 40K]	65	2.541048%
+[40K, 50K]	46	1.798280%
+[50K, 60K]	15	0.586396%
+[60K, 70K]	18	0.703675%
+[70K, 80K]	9	0.351837%
+[80K, 90K]	14	0.547303%
+[90K, 100K]	12	0.469116%
+Greater		211	8.248632%
+=======		=====	=======
+TOTAL FILES	2558	100.000000%
+
+El resultado de aplicar el programa al directorio $HOME con la opción n es:
+
+Results for the directory /home/usuarioso.
+Range		Total	Percentage
+[ 0,  10]	339	89.682540%
+[10,  20]	25	6.613757%
+[20,  30]	3	0.793651%
+[30,  40]	6	1.587302%
+[40,  50]	1	0.264550%
+[50,  60]	0	0.000000%
+[60,  70]	1	0.264550%
+[70,  80]	1	0.264550%
+[80,  90]	0	0.000000%
+[90, 100]	0	0.000000%
+More than 100	2	0.529101%
+=======		=====	=======
+TOTAL DIRECT.	378	100.000000%
+
+--Ejercicio 4--
+
+Para ver el contenido del fichero 2, en lugar de obtener 7 bytes a partir del byte 32768 = 4096*8, hay que mirar al principio del siguiente bloque de datos , que será el que se haya asignado al fichero 2. Entonces, hay que obtener 15 bytes (lo que ocupa el fichero, de acuerdo con my-fsck) a partir del byte 36864 = 4096*9, es decir, utilizamos el mandato:
+
+  hexdump -C -s 36864 -n 15 virtual-disk
+  
+para ver el contenido del fichero 2.

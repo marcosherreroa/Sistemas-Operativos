@@ -1,0 +1,29 @@
+Marcos Herrero
+
+Ejercicio 1)
+
+a) 
+Únicamente se crean procesos en la única llamada fork que hay en el interior del bucle.
+Suponiendo que ninguna de las llamadas a fork falle, en cada una de las N=3 iteraciones del bucle cada proceso que entra en ella genera un hijo. Entonces, el número total de procesos que intervienen se duplica en cada iteración del bucle, de manera que al final del programa se han creado 2^N = 8 procesos (contando al padre original).
+
+b)
+Dado que los procesos no hacen wait hasta haber acabado de generar a todos sus hijos, no hay nada que impida que todos los procesos creados coexistan simultáneamente activos. Por tanto, puede haber un máximo de 2^N=8 procesos activos.
+
+c)
+Para que un proceso hijo quede en estado zombi (cualquiera distinto del padre oiginal) basta con que termine la ejecución (ejecute la instrucción exit(0)) antes de que su padre llegue al bucle "while (wait(NULL) != -1". Si se da esta situación (basta con planificar los hijos antes que los padres), el hijo permanecerá en estado zombie hasta que su padre llegue al bucle mencionado y, mediante la llamada wait, obtenga el estado de terminación y libere el BCP del hijo
+
+d)
+No cambia nada si p_heap se declara como variable global. De hecho, esto es lo que se hace con la varable a, y se observa que el valor almacenado en a y el apuntado por p_heap es siempre el mismo
+
+e)
+Si cada proceso realiza la llamada open, lo que cambiaría es que los descriptores de fichero fd y file_desc harían referencia, en cada proceso, a una entrada diferente de la tabla intermedia de posiciones (aunque todas estas entradas se refieran, de hecho, al mismo fichero). Esto se traduciría a que, si bien todos los procesos tendrían abierto el mismo fichero, no compartirían el puntero de posición.
+Como resultado de esto, la escritura concurrente en el fichero tendría un comportamiento indefinido. Lo escrito por unos procesos sobrescribiría lo escrito por los anteriores. Pero además no hay garantía de que cada uno de los fprintf se ejecute atómicamente, así que en una línea puede acabar habiendo contenido escrito por distintos procesos.
+
+f)
+Para que un proceso hijo pase a ser hijo del proceso init se requiere que su padre termine antes que él. Esto no puede ocurrir en el código original porque, con el bucle "while (wait(NULL) != -1)", todo proceso espera a la terminación de todos sus hijos antes de terminar él. Si eliminamos este bucle, entonces sí que podría ocurrir que un padre terminara antes que su hijo (basta con planificar los padres antes que los hijos), con lo que sus hijos se covertirían en hijos del proceso init
+
+Ejemplo 1)
+
+partial_sum1 no ofrece siempre el resultado correcto porquela operación "total_sum = total_sum + j" no es atómica, afecta al valor de una variabe compartida y no se está realizando con exclusión mutua. Entonces, es posible que uno de los hilos realice la suma con un valor desactualizado de total_sum y, a continuación, sobreescriba el resultado (incorrecto) en total_sum.
+
+En partial_sum2 lo que se hace es forzar la situación anterior cediendo el procesador justo después de obtener el valor de total_sum. De esta manera, el total_sum utilizado en las operaciones siempre está desactualizado, así que el resultado siempre va a ser incorrecto

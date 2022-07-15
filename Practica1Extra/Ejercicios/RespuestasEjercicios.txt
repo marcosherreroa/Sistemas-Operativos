@@ -1,0 +1,20 @@
+* Ejercicio 1
+
+El comando para crear un ejecutable de nombre show_file es:
+gcc -o show_file show_file.c
+
+El comando para solo compilar:
+gcc -c show_file.c
+
+Y para, en un segundo paso, enlazar:
+gcc -o show_file show_file.o
+
+El código de show_file.c se ha modificado como se pedía
+
+* Ejercicio 2
+
+Los errores del código eran:
+1. En la cabecera del for( línea 21), hay que cambiar el '&' por '&&'
+2. Al final del do-while ( pero fuera del if), hay que añadir la instrucción 'p = p+1' (de otra manera no estamos mirando más que los dos primeros elementos del array)
+
+Los errores han sido corregidos en el código de badsort-ptr.c
